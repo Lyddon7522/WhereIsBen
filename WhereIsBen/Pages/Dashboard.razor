@@ -1,0 +1,31 @@
+﻿@page "/"
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudGrid>
+        <MudItem Class="d-flex align-center justify-center" xs="12">
+            <MudText Typo="Typo.h3"> Current Status: @_location</MudText>
+        </MudItem>
+        <MudGrid Class="mt-4">
+            <MudItem xs="12" Class="d-flex align-center justify-center mud-width-full">
+                <MudButton Class="ma-2" Variant="Variant.Filled" StartIcon="@Icons.Filled.Home" Color="Color.Secondary" Size="Size.Large" OnClick='(e) => ToggleLocation("Home")'>
+                    Home
+                </MudButton>
+                <MudButton Class="ma-2" Variant="Variant.Filled" StartIcon="@Icons.Filled.LocalPizza" Color="Color.Primary" Size="Size.Large" OnClick='(e) => ToggleLocation("Office")'>
+                    Office
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudGrid>
+</MudContainer>
+
+@code
+{
+    private string _location = "Home";
+
+    private void ToggleLocation(string location)
+    {
+        _location = location;
+    }
+
+
+}

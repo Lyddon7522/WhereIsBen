@@ -1,12 +1,15 @@
 ﻿@inherits LayoutComponentBase
+<PageTitle>Where's Bendo</PageTitle>
 
 <MudLayout>
     <MudAppBar Elevation="1">
             <MudText Typo="Typo.h5" Class="ml-3">Where's Bendo?</MudText>
     </MudAppBar>
-        <MudMainContent>
+    <MudMainContent>
+        <MudContainer Class="mt-2" MaxWidth="MaxWidth.Large">
             @Body
-        </MudMainContent>
+        </MudContainer>
+    </MudMainContent>
 </MudLayout>
 
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode"/>
