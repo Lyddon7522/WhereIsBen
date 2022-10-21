@@ -28,7 +28,17 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build --configuration Release
       - name: Test
         run: dotnet test --no-build --verbosity normal
+      - name: Publish Blazor webassembly using dotnet
+        run: dotnet publish -c Release --no-build -o ./ 
+      - name: Publish generated Blazor webassembly to Netlify
+        uses: netlify/actions/cli@master 
+        env: 
+            NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+            NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        with:
+            args: deploy --dir=WhereIsBen/wwwroot --prod 
+            secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]' 
       
