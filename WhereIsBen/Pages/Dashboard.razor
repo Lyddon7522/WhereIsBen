@@ -1,6 +1,9 @@
 ﻿@page "/"
 @using WhereIsBen.Data
 @using GraphQL
+@using System.Runtime.InteropServices
+@using System.Transactions
+@using GraphQL.Utilities.Federation
 
 @inject ISnackbar Snackbar
 @inject LocationService Location;
@@ -33,37 +36,53 @@
 @code
 {
     private string? _location;
-    private GraphQLResponse<LocationData> locations;
+    private int _id;
+    private GraphQLResponse<LocationData>? _locations;
 
     protected override async Task OnInitializedAsync()
     {
-
         await GetLocations();
-        /*var result = await Location.GetLocation();
-
-        _location = result.Data.locations.FirstOrDefault().LocationName;*/
-
     }
 
     private async Task GetLocations()
     {
-        locations = await Location.GetLocation();
+        _locations = await Location.GetLocation();
 
-        _location = locations.Data.locations.FirstOrDefault()?.location;
+        _location = _locations?.Data.locations.FirstOrDefault()?.location;
+        _id = _locations!.Data.locations.FirstOrDefault()!.Id;
     }
 
-    private void ToggleLocation(string location)
+    private async Task<GraphQLResponse<Location>> UpdateLocation(string location)
     {
-        _location = location;
+        return await Location.Updatelocation(_id, location);
+    }
 
-        if (_location == "Office")
+    private async Task ToggleLocation(string location)
+    {
+        GraphQLResponse<Location> updatedLocation = await UpdateLocation(location);
+
+        if (updatedLocation.Errors == null)
         {
-            Snackbar.Add("Shocker \U0001F64C", Severity.Success);
+            await GetLocations();
+        
+            this.StateHasChanged();
+
+            if (_location == "Office")
+            {
+                Snackbar.Add("Shocker \U0001F64C", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Are you sure? \U0001F632", Severity.Warning);
+            }
         }
         else
         {
-            Snackbar.Add("Are you sure? \U0001F632", Severity.Warning);
+            Snackbar.Add("Something went wrong...", Severity.Error);
         }
+        
+
+        
     }
 
 
