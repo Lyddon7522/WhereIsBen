@@ -1,40 +1,88 @@
 ﻿@page "/"
-@inject ISnackbar Snackbar
+@using WhereIsBen.Data
+@using GraphQL
+@using System.Runtime.InteropServices
+@using System.Transactions
+@using GraphQL.Utilities.Federation
 
-<MudContainer MaxWidth="MaxWidth.Large">
-    <MudGrid>
-        <MudItem Class="d-flex align-center justify-center" xs="12">
-            <MudText Typo="Typo.h3"> Current Status: @_location</MudText>
-        </MudItem>
-        <MudGrid Class="mt-4">
-            <MudItem xs="12" Class="d-flex align-center justify-center mud-width-full">
-                <MudButton Class="ma-2" Variant="Variant.Filled" StartIcon="@Icons.Filled.Home" Color="Color.Secondary" Size="Size.Large" OnClick='(e) => ToggleLocation("Home")'>
-                    Home
-                </MudButton>
-                <MudButton Class="ma-2" Variant="Variant.Filled" StartIcon="@Icons.Filled.LocalPizza" Color="Color.Primary" Size="Size.Large" OnClick='(e) => ToggleLocation("Office")'>
-                    Office
-                </MudButton>
-            </MudItem>
-        </MudGrid>
-    </MudGrid>
-</MudContainer>
+@inject ISnackbar Snackbar
+@inject LocationService Location;
+
+ @if (_location == null)
+    {
+        <MudText Typo="Typo.h3">Loading...</MudText>
+    }
+ else
+ {
+     <MudContainer MaxWidth="MaxWidth.Large">
+         <MudGrid>
+             <MudItem Class="d-flex align-center justify-center" xs="12">
+                 <MudText Typo="Typo.h3"> Current Status: @_location</MudText>
+             </MudItem>
+             <MudGrid Class="mt-4">
+                 <MudItem xs="12" Class="d-flex align-center justify-center mud-width-full">
+                     <MudButton Class="ma-2" Variant="Variant.Filled" StartIcon="@Icons.Filled.Home" Color="Color.Secondary" Size="Size.Large" OnClick='(e) => ToggleLocation("Home")'>
+                         Home
+                     </MudButton>
+                     <MudButton Class="ma-2" Variant="Variant.Filled" StartIcon="@Icons.Filled.LocalPizza" Color="Color.Primary" Size="Size.Large" OnClick='(e) => ToggleLocation("Office")'>
+                         Office
+                     </MudButton>
+                 </MudItem>
+             </MudGrid>
+         </MudGrid>
+     </MudContainer>
+ }
 
 @code
 {
-    private string _location = "Home";
+    private string? _location;
+    private int _id;
+    private GraphQLResponse<LocationData>? _locations;
 
-    private void ToggleLocation(string location)
+    protected override async Task OnInitializedAsync()
     {
-        _location = location;
-        
-        if (_location == "Office")
+        await GetLocations();
+    }
+
+    private async Task GetLocations()
+    {
+        _locations = await Location.GetLocation();
+
+        _location = _locations?.Data.locations.FirstOrDefault()?.location;
+        _id = _locations!.Data.locations.FirstOrDefault()!.Id;
+    }
+
+    private async Task<GraphQLResponse<Location>> UpdateLocation(string location)
+    {
+        return await Location.Updatelocation(_id, location);
+    }
+
+    private async Task ToggleLocation(string location)
+    {
+        GraphQLResponse<Location> updatedLocation = await UpdateLocation(location);
+
+        if (updatedLocation.Errors == null)
         {
-            Snackbar.Add("Shocker \U0001F64C", Severity.Success);
+            await GetLocations();
+        
+            this.StateHasChanged();
+
+            if (_location == "Office")
+            {
+                Snackbar.Add("Shocker \U0001F64C", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Are you sure? \U0001F632", Severity.Warning);
+            }
         }
         else
         {
-            Snackbar.Add("Are you sure? \U0001F632", Severity.Warning);
+            Snackbar.Add("Something went wrong...", Severity.Error);
         }
+        
+
+        
     }
 
 
