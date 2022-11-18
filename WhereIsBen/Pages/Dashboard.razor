@@ -21,12 +21,20 @@
              </MudItem>
              <MudGrid Class="mt-4">
                  <MudItem xs="12" Class="d-flex align-center justify-center mud-width-full">
-                     <MudButton Class="ma-2" Variant="Variant.Filled" StartIcon="@Icons.Filled.Home" Color="Color.Secondary" Size="Size.Large" OnClick='(e) => ToggleLocation("Home")'>
+                    <MudButton Class="ma-2" Variant="Variant.Filled" StartIcon="@Icons.Filled.Home" Color="Color.Secondary" Size="Size.Large" OnClick='(e) => ToggleLocation("Home")' Disabled=_isLoading>
                          Home
-                     </MudButton>
-                     <MudButton Class="ma-2" Variant="Variant.Filled" StartIcon="@Icons.Filled.LocalPizza" Color="Color.Primary" Size="Size.Large" OnClick='(e) => ToggleLocation("Office")'>
-                         Office
-                     </MudButton>
+                        @if (_isLoading)
+                        {
+                            <MudProgressCircular Indeterminate=true Color="Color.Primary" Size="Size.Small" Class="ml-1"/>
+                        }
+                    </MudButton>
+                    <MudButton Class="ma-2" Variant="Variant.Filled" StartIcon="@Icons.Filled.LocalPizza" Color="Color.Primary" Size="Size.Large" OnClick='(e) => ToggleLocation("Office")' Disabled=_isLoading>
+                        Office
+                        @if (_isLoading)
+                        {
+                            <MudProgressCircular Indeterminate=true Color="Color.Primary" Size="Size.Small" Class="ml-1"/>
+                        }
+                    </MudButton>
                  </MudItem>
              </MudGrid>
          </MudGrid>
@@ -35,6 +43,7 @@
 
 @code
 {
+    private bool _isLoading;
     private string? _location;
     private int _id;
     private GraphQLResponse<LocationData>? _locations;
@@ -59,13 +68,12 @@
 
     private async Task ToggleLocation(string location)
     {
+        _isLoading = true;
         GraphQLResponse<Location> updatedLocation = await UpdateLocation(location);
 
         if (updatedLocation.Errors == null)
         {
             await GetLocations();
-        
-            this.StateHasChanged();
 
             if (_location == "Office")
             {
@@ -80,10 +88,7 @@
         {
             Snackbar.Add("Something went wrong...", Severity.Error);
         }
-        
 
-        
+        _isLoading = false;
     }
-
-
 }
