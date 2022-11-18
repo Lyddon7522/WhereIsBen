@@ -3,7 +3,7 @@
 
 <MudLayout>
     <MudAppBar Elevation="1">
-            <MudText Typo="Typo.h5" Class="ml-3">Where's Bendo?</MudText>
+        <MudText Typo="Typo.h5" Class="ml-3">Where's Bendo?</MudText>
     </MudAppBar>
     <MudMainContent>
         <MudContainer Class="mt-2" MaxWidth="MaxWidth.Large">
@@ -18,13 +18,13 @@
 
 @code {
     private bool _isDarkMode;
-    private MudThemeProvider _mudThemeProvider = default!;
+    private MudThemeProvider? _mudThemeProvider;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            _isDarkMode = await _mudThemeProvider.GetSystemPreference();
+            _isDarkMode = await _mudThemeProvider!.GetSystemPreference();
             StateHasChanged();
         }
     }
